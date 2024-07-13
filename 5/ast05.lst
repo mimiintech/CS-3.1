@@ -1,0 +1,402 @@
+     1                                 %line 1+1 ast05.asm
+     2                                 
+     3                                 
+     4                                 
+     5                                 
+     6                                 
+     7                                 
+     8                                 
+     9                                 
+    10                                 
+    11                                 
+    12                                 
+    13                                 
+    14                                 
+    15                                 [section .data]
+    16                                 
+    17                                 
+    18                                 
+    19                                 NULL equ 0
+    20                                 
+    21                                 TRUE equ 1
+    22                                 FALSE equ 0
+    23                                 
+    24                                 EXIT_SUCCESS equ 0
+    25                                 SYS_exit equ 60
+    26                                 
+    27                                 
+    28                                 
+    29                                 
+    30 00000000 94C2A2A376             bases db 148, 194, 162, 163, 118
+    31 00000005 A1919881A5              db 161, 145, 152, 129, 165
+    32 0000000A 7064B9A37D              db 112, 100, 185, 163, 125
+    33 0000000F B0939B6E71              db 176, 147, 155, 110, 113
+    34 00000014 6C91A1A4A5              db 108, 145, 161, 164, 165
+    35 00000019 B1789C93A1              db 177, 120, 156, 147, 161
+    36 0000001E 9877A5A183              db 152, 119, 165, 161, 131
+    37 00000023 A5727B7372              db 165, 114, 123, 115, 114
+    38 00000028 65AB6F                  db 101, 171, 111
+    39                                 
+    40 0000002B E900D600DF00D300EA-    slants dw 233, 214, 223, 211, 234
+    41 0000002B 00                 
+    42 00000035 D400C8001D010701CD-     dw 212, 200, 285, 263, 205
+    43 00000035 00                 
+    44 0000003F 0801D500E000D50009-     dw 264, 213, 224, 213, 265
+    45 0000003F 01                 
+    46 00000049 F400D400D500D400DF-     dw 244, 212, 213, 212, 223
+    47 00000049 00                 
+    48 00000053 090108011101D800EA-     dw 265, 264, 273, 216, 234
+    49 00000053 00                 
+    50 0000005D FD00D500F300D500EB-     dw 253, 213, 243, 213, 235
+    51 0000005D 00                 
+    52 00000067 F400A900EA00E900E8-     dw 244, 169, 234, 233, 232
+    53 00000067 00                 
+    54 00000071 EA00DF00D700D600C9-     dw 234, 223, 215, 214, 201
+    55 00000071 00                 
+    56 0000007B DE00F200E900            dw 222, 242, 233
+    57                                 
+    58 00000081 F5000000EA000000DF-    heights dd 245, 234, 223, 223, 223
+    59 00000081 000000DF000000DF00-
+    60 00000081 0000               
+    61 00000095 FD000000FD000000F3-     dd 253, 253, 243, 253, 235
+    62 00000095 000000FD000000EB00-
+    63 00000095 0000               
+    64 000000A9 EA000000EA00000000-     dd 234, 234, 256, 264, 242
+    65 000000A9 01000008010000F200-
+    66 000000A9 0000               
+    67 000000BD FD000000FD0000001C-     dd 253, 253, 284, 242, 234
+    68 000000BD 010000F2000000EA00-
+    69 000000BD 0000               
+    70 000000D1 F5000000EA000000DF-     dd 245, 234, 223, 223, 223
+    71 000000D1 000000DF000000DF00-
+    72 000000D1 0000               
+    73 000000E5 EA000000EA00000000-     dd 234, 234, 256, 264, 242
+    74 000000E5 01000008010000F200-
+    75 000000E5 0000               
+    76 000000F9 FD000000FD0000001C-     dd 253, 253, 284, 242, 234
+    77 000000F9 010000F2000000EA00-
+    78 000000F9 0000               
+    79 0000010D 0001000008010000F2-     dd 256, 264, 242, 234, 201
+    80 0000010D 000000EA000000C900-
+    81 0000010D 0000               
+    82 00000121 C9000000DF00000010-     dd 201, 223, 272
+    83 00000121 010000             
+    84                                 
+    85 0000012D 2B000000               length dd 43
+    86                                 
+    87 00000131 00000000               laMin dd 0
+    88 00000135 00000000               laEstMed dd 0
+    89 00000139 00000000               laMax dd 0
+    90 0000013D 00000000               laSum dd 0
+    91 00000141 00000000               laAve dd 0
+    92                                 
+    93 00000145 00000000               taMin dd 0
+    94 00000149 00000000               taEstMed dd 0
+    95 0000014D 00000000               taMax dd 0
+    96 00000151 00000000               taSum dd 0
+    97 00000155 00000000               taAve dd 0
+    98                                 
+    99 00000159 00000000               vMin dd 0
+   100 0000015D 00000000               vEstMed dd 0
+   101 00000161 00000000               vMax dd 0
+   102 00000165 00000000               vSum dd 0
+   103 00000169 00000000               vAve dd 0
+   104                                 
+   105                                 
+   106                                 
+   107                                 
+   108 0000016D 02000000               ddTwo dd 2
+   109 00000171 03000000               ddThree dd 3
+   110                                 
+   111                                 
+   112                                 
+   113                                 
+   114                                 [section .bss]
+   115                                 
+   116 00000000 <gap>                  lateralAreas resd 43
+   117 000000AC <gap>                  totalAreas resd 43
+   118 00000158 <gap>                  volumes resd 43
+   119                                 
+   120                                 [section .text]
+   121                                 [global _start]
+   122                                 _start:
+   123                                 
+   124                                 
+   125                                 
+   126                                 
+   127                                 
+   128                                 
+   129                                 
+   130                                 
+   131                                 
+   132 00000000 8B0C25[00000000]       mov ecx, dword [length]
+   133 00000007 48C7C600000000         mov rsi, 0
+   134                                 
+   135                                 calcLoop:
+   136 0000000E 0FB686[00000000]        movzx eax, byte [bases+rsi]
+   137 00000015 440FB78436[00000000]      movzx r8d, word [slants+rsi*2]
+   138                                 
+   139 0000001E 41F7E0                  mul r8d
+   140 00000021 BB02000000              mov ebx, 2
+   141 00000026 F7E3                    mul ebx
+   142                                 
+   143 00000028 8904B5[00000000]        mov dword [lateralAreas+rsi*4], eax
+   144 0000002F 48FFC6                  inc rsi
+   145 00000032 E2D8                    loop calcLoop
+   146                                 
+   147                                 
+   148 00000034 8B0C25[00000000]       mov ecx, dword [length]
+   149 0000003B 48C7C600000000         mov rsi, 0
+   150                                 
+   151 00000042 8B0425[00000000]       mov eax, dword [lateralAreas]
+   152 00000049 890425[00000000]       mov dword [laMin], eax
+   153 00000050 890425[00000000]       mov dword [laMax], eax
+   154 00000057 C70425[00000000]00-    mov dword [laSum], 0
+   155 00000057 000000             
+   156                                 
+   157                                 statsLoop:
+   158 00000062 8B04B5[00000000]       mov eax, dword [lateralAreas+rsi*4]
+   159 00000069 010425[00000000]       add dword [laSum], eax
+   160 00000070 3B0425[00000000]       cmp eax, dword [laMin]
+   161 00000077 7305                   jae notNewLaMin
+   162 00000079 890425[00000000]       mov dword [laMin], eax
+   163                                 notNewLaMin:
+   164 00000080 3B0425[00000000]       cmp eax, dword [laMax]
+   165 00000087 7605                   jbe notNewLaMax
+   166 00000089 890425[00000000]       mov dword [laMax], eax
+   167                                 notNewLaMax:
+   168 00000090 48FFC6                 inc rsi
+   169 00000093 E2CB                   loop statsLoop
+   170                                 
+   171                                 
+   172 00000095 8B0425[00000000]       mov eax, dword [laSum]
+   173 0000009C BA00000000             mov edx, 0
+   174 000000A1 F73425[00000000]       div dword [length]
+   175 000000A8 890425[00000000]       mov dword [laAve], eax
+   176                                 
+   177                                 
+   178                                 
+   179                                 
+   180 000000AF 8B0425[00000000]       mov eax, dword [lateralAreas]
+   181 000000B6 4189C0                 mov r8d, eax
+   182                                 
+   183                                 
+   184 000000B9 8B3425[00000000]       mov esi, dword [length]
+   185 000000C0 FFCE                   dec esi
+   186 000000C2 678B04B5[00000000]     mov eax, dword [lateralAreas+esi*4]
+   187 000000CA 4189C5                 mov r13d, eax
+   188                                 
+   189                                 
+   190 000000CD 8B0425[00000000]       mov eax, dword [length]
+   191 000000D4 BA00000000             mov edx, 0
+   192 000000D9 B902000000             mov ecx, 2
+   193 000000DE F7F1                   div ecx
+   194 000000E0 4189C2                 mov r10d, eax
+   195 000000E3 67428B0495[00000000]     mov eax, dword [lateralAreas+r10d*4]
+   196 000000EC 4189C2                 mov r10d, eax
+   197                                 
+   198                                 
+   199 000000EF 4589C4                 mov r12d, r8d
+   200 000000F2 4501EC                 add r12d, r13d
+   201 000000F5 4501D4                 add r12d, r10d
+   202                                 
+   203                                 
+   204 000000F8 4489E0                 mov eax, r12d
+   205 000000FB 99                     cdq
+   206 000000FC BB03000000             mov ebx, 3
+   207 00000101 F7FB                   idiv ebx
+   208                                 
+   209 00000103 890425[00000000]       mov dword [laEstMed], eax
+   210                                 
+   211                                 
+   212                                 
+   213                                 
+   214                                 
+   215                                 
+   216                                 
+   217                                 
+   218                                 
+   219 0000010A 8B0C25[00000000]       mov ecx, dword [length]
+   220 00000111 48C7C600000000         mov rsi, 0
+   221                                 
+   222                                 calcLoopTwo:
+   223 00000118 440FB686[00000000]      movzx r8d, byte [bases+rsi]
+   224 00000120 440FB78C36[00000000]      movzx r9d, word [slants+rsi*2]
+   225                                 
+   226                                 
+   227                                 
+   228 00000129 4489C8                  mov eax, r9d
+   229 0000012C F72425[00000000]        mul dword [ddTwo]
+   230                                 
+   231 00000133 4489C3                  mov ebx, r8d
+   232 00000136 01D8                    add eax, ebx
+   233                                 
+   234 00000138 F7E3                    mul ebx
+   235                                 
+   236 0000013A 8904B5[00000000]        mov dword [totalAreas+rsi*4], eax
+   237 00000141 48FFC6                  inc rsi
+   238 00000144 E2D0                    loop calcLoopTwo
+   239                                 
+   240                                 
+   241 00000146 8B0C25[00000000]       mov ecx, dword [length]
+   242 0000014D 48C7C600000000         mov rsi, 0
+   243                                 
+   244 00000154 8B0425[00000000]       mov eax, dword [totalAreas]
+   245 0000015B 890425[00000000]       mov dword [taMin], eax
+   246 00000162 890425[00000000]       mov dword [taMax], eax
+   247 00000169 C70425[00000000]00-    mov dword [taSum], 0
+   248 00000169 000000             
+   249                                 
+   250                                 statsLoopTwo:
+   251 00000174 8B04B5[00000000]       mov eax, dword [totalAreas+rsi*4]
+   252 0000017B 010425[00000000]       add dword [taSum], eax
+   253 00000182 3B0425[00000000]       cmp eax, dword [taMin]
+   254 00000189 7305                   jae notNewTaMin
+   255 0000018B 890425[00000000]       mov dword [taMin], eax
+   256                                 notNewTaMin:
+   257 00000192 3B0425[00000000]       cmp eax, dword [taMax]
+   258 00000199 7605                   jbe notNewTaMax
+   259 0000019B 890425[00000000]       mov dword [taMax], eax
+   260                                 notNewTaMax:
+   261 000001A2 48FFC6                 inc rsi
+   262 000001A5 E2CB                   loop statsLoopTwo
+   263                                 
+   264                                 
+   265 000001A7 8B0425[00000000]       mov eax, dword [taSum]
+   266 000001AE BA00000000             mov edx, 0
+   267 000001B3 F73425[00000000]       div dword [length]
+   268 000001BA 890425[00000000]       mov dword [taAve], eax
+   269                                 
+   270                                 
+   271 000001C1 8B0425[00000000]       mov eax, dword [totalAreas]
+   272 000001C8 4189C0                 mov r8d, eax
+   273                                 
+   274                                 
+   275 000001CB 8B3425[00000000]       mov esi, dword [length]
+   276 000001D2 FFCE                   dec esi
+   277 000001D4 678B04B5[00000000]     mov eax, dword [totalAreas+esi*4]
+   278 000001DC 4189C5                 mov r13d, eax
+   279                                 
+   280                                 
+   281 000001DF 8B0425[00000000]       mov eax, dword [length]
+   282 000001E6 BA00000000             mov edx, 0
+   283 000001EB B902000000             mov ecx, 2
+   284 000001F0 F7F1                   div ecx
+   285 000001F2 4189C2                 mov r10d, eax
+   286 000001F5 67428B0495[00000000]     mov eax, dword [totalAreas+r10d*4]
+   287 000001FE 4189C2                 mov r10d, eax
+   288                                 
+   289                                 
+   290 00000201 4589C4                 mov r12d, r8d
+   291 00000204 4501EC                 add r12d, r13d
+   292 00000207 4501D4                 add r12d, r10d
+   293                                 
+   294                                 
+   295 0000020A 4489E0                 mov eax, r12d
+   296 0000020D 99                     cdq
+   297 0000020E BB03000000             mov ebx, 3
+   298 00000213 F7FB                   idiv ebx
+   299                                 
+   300 00000215 890425[00000000]       mov dword [taEstMed], eax
+   301                                 
+   302                                 
+   303                                 
+   304                                 
+   305                                 
+   306                                 
+   307                                 
+   308                                 
+   309                                 
+   310                                 
+   311                                 
+   312                                 
+   313                                 
+   314                                 
+   315 0000021C 8B0C25[00000000]        mov ecx, dword [length]
+   316 00000223 48C7C600000000          mov rsi, 0
+   317                                 
+   318                                 calcLoopThreeStart:
+   319 0000022A 0FB686[00000000]        movzx eax, byte [bases + rsi]
+   320                                 
+   321                                 
+   322 00000231 F7E0                    mul eax
+   323 00000233 89C3                    mov ebx, eax
+   324                                 
+   325 00000235 8B04B5[00000000]        mov eax, [heights + rsi*4]
+   326 0000023C F7E3                    mul ebx
+   327                                 
+   328 0000023E 8B1C25[00000000]        mov ebx, [ddThree]
+   329 00000245 F7F3                    div ebx
+   330                                 
+   331 00000247 8904B5[00000000]        mov [volumes + rsi*4], eax
+   332 0000024E 48FFC6                  inc rsi
+   333 00000251 E2D5                    loop calcLoopThreeStart
+   334                                 
+   335                                 
+   336 00000253 8B0C25[00000000]       mov ecx, dword [length]
+   337 0000025A 48C7C600000000         mov rsi, 0
+   338                                 
+   339 00000261 8B0425[00000000]       mov eax, dword [volumes]
+   340 00000268 890425[00000000]       mov dword [vMin], eax
+   341 0000026F 890425[00000000]       mov dword [vMax], eax
+   342 00000276 C70425[00000000]00-    mov dword [vSum], 0
+   343 00000276 000000             
+   344                                 
+   345                                 statsLoopThree:
+   346 00000281 8B04B5[00000000]       mov eax, dword [volumes+rsi*4]
+   347 00000288 010425[00000000]       add dword [vSum], eax
+   348 0000028F 3B0425[00000000]       cmp eax, dword [vMin]
+   349 00000296 7305                   jae notNewVMin
+   350 00000298 890425[00000000]       mov dword [vMin], eax
+   351                                 notNewVMin:
+   352 0000029F 3B0425[00000000]       cmp eax, dword [vMax]
+   353 000002A6 7605                   jbe notNewVMax
+   354 000002A8 890425[00000000]       mov dword [vMax], eax
+   355                                 notNewVMax:
+   356 000002AF 48FFC6                 inc rsi
+   357 000002B2 E2CB                   loop statsLoopThree
+   358                                 
+   359                                 
+   360 000002B4 8B0425[00000000]       mov eax, dword [vSum]
+   361 000002BB BA00000000             mov edx, 0
+   362 000002C0 F73425[00000000]       div dword [length]
+   363 000002C7 890425[00000000]       mov dword [vAve], eax
+   364                                 
+   365                                 
+   366 000002CE 8B0425[00000000]       mov eax, dword [volumes]
+   367 000002D5 4189C0                 mov r8d, eax
+   368                                 
+   369                                 
+   370 000002D8 8B3425[00000000]       mov esi, dword [length]
+   371 000002DF FFCE                   dec esi
+   372 000002E1 678B04B5[00000000]     mov eax, dword [volumes+esi*4]
+   373 000002E9 4189C5                 mov r13d, eax
+   374                                 
+   375                                 
+   376 000002EC 8B0425[00000000]       mov eax, dword [length]
+   377 000002F3 BA00000000             mov edx, 0
+   378 000002F8 B902000000             mov ecx, 2
+   379 000002FD F7F1                   div ecx
+   380 000002FF 4189C2                 mov r10d, eax
+   381 00000302 67428B0495[00000000]     mov eax, dword [volumes+r10d*4]
+   382 0000030B 4189C2                 mov r10d, eax
+   383                                 
+   384                                 
+   385 0000030E 4589C4                 mov r12d, r8d
+   386 00000311 4501EC                 add r12d, r13d
+   387 00000314 4501D4                 add r12d, r10d
+   388                                 
+   389                                 
+   390 00000317 4489E0                 mov eax, r12d
+   391 0000031A 99                     cdq
+   392 0000031B BB03000000             mov ebx, 3
+   393 00000320 F7FB                   idiv ebx
+   394                                 
+   395 00000322 890425[00000000]       mov dword [vEstMed], eax
+   396                                 
+   397                                 
+   398                                 
+   399                                 last:
+   400 00000329 48C7C03C000000          mov rax, SYS_exit
+   401 00000330 48C7C700000000          mov rdi, EXIT_SUCCESS
+   402 00000337 0F05                    syscall

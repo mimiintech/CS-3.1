@@ -1,0 +1,54 @@
+; *****************************************************************
+; *****************************************************************
+;  Name: Michelle Silva
+;  NSHE_ID: 5006988436
+;  Section: 1001 & 1002
+;  Assignment: 11
+;  Description: Become more familiar with operating system interaction, file input/output operations, and
+;file I/O buffering.
+
+
+*****************************************************************
+
+Machine Description:
+--------------------
+<machine type (desktop/laptop/mini), processor speed, disk type (ssd, hard-drive, etc.) and memory>
+
+I have the laptop MacBook Pro 13-inch, 2020 that has Two Thunderbolt 3 ports.
+My MacBook includes the following below:
+    - Processor 1.4 GHz Quad-Core Intel Core i5
+    - SSD Storage 
+    - Graphics Intel Iris Plus Graphics 645 1536 MB
+    - Memory 8 GB 2133 MHz LPDDR3
+    - macOS 13.1 (22C65)
+    
+Timing:
+-------
+Large Buffer
+Average Real Time: 4.1295 seconds
+    - Faster time 
+Small Buffer
+Average Real Time: 143.033 seconds 
+    - Slower time 
+Percentage Change: 3363.69% increase
+
+Explanation:
+------------
+<not to exceed 200 words>
+Based on my results, the large buffer process had an exact 
+average real time of 4.1295 seconds, which was significantly 
+faster than the small buffer of 143.033 seconds. 
+
+The time difference between the two processes is 138.9035 seconds.
+The percentage change show a 3363.69% increase in time when moving 
+from the large buffer to the small buffer.
+
+This vast difference for the small buffer is largely due to how 
+frequently (syscalls) are made. Therefore, with a smaller buffer
+syscalls happen more often which causes the operating system to 
+spend additional time in doing operations which lead to a slower
+execution speed. 
+
+Total Words: 101 
+
+

@@ -1,0 +1,113 @@
+     1                                 %line 1+1 ast02.asm
+     2                                 
+     3                                 
+     4                                 
+     5                                 
+     6                                 
+     7                                 
+     8                                 
+     9                                 
+    10                                 
+    11                                 
+    12                                 [section .data]
+    13                                 
+    14                                 
+    15                                 
+    16                                 NULL equ 0
+    17                                 
+    18                                 TRUE equ 1
+    19                                 FALSE equ 0
+    20                                 
+    21                                 EXIT_SUCCESS equ 0
+    22                                 SYS_exit equ 60
+    23                                 
+    24                                 
+    25                                 
+    26                                 
+    27                                 
+    28 00000000 25                     bVar1 db 37
+    29 00000001 33                     bVar2 db 51
+    30 00000002 00                     bAns1 db 0
+    31 00000003 00                     bAns2 db 0
+    32 00000004 5E0A                   wVar1 dw 2654
+    33 00000006 5107                   wVar2 dw 1873
+    34 00000008 0000                   wAns1 dw 0
+    35 0000000A 0000                   wAns2 dw 0
+    36 0000000C D960C809               dVar1 dd 164126937
+    37 00000010 89371C06               dVar2 dd 102512521
+    38 00000014 8CC3FFFF               dVar3 dd -15476
+    39 00000018 00000000               dAns1 dd 0
+    40 0000001C 00000000               dAns2 dd 0
+    41 00000020 781A99BE1C000000       qVar1 dq 123456789112
+    42 00000028 000072C1               flt1 dd -15.125
+    43 0000002C 00003441               flt2 dd 11.25
+    44 00000030 4DF82D40               tao dd 2.71828
+    45 00000034 43532D32313800         myClass db "CS-218", NULL
+    46 0000003B 4D6179207468652066-    saying db "May the force be with you.", NULL
+    47 0000003B 6F7263652062652077-
+    48 0000003B 69746820796F752E00 
+    49 00000056 4D696368656C6C6520-    myName db "Michelle Silva", NULL
+    50 00000056 53696C766100       
+    51                                 
+    52                                 
+    53                                 
+    54                                 
+    55                                 
+    56                                 [section .bss]
+    57                                 
+    58                                 
+    59                                 
+    60                                 
+    61                                 
+    62                                 
+    63                                 
+    64                                 [section .text]
+    65                                 [global _start]
+    66                                 _start:
+    67                                 
+    68                                 
+    69                                 
+    70                                 
+    71                                 
+    72                                 
+    73 00000000 8A0425[00000000]       mov al, byte [bVar1]
+    74 00000007 020425[00000000]       add al, byte [bVar2]
+    75 0000000E 880425[00000000]       mov byte [bAns1], al
+    76                                 
+    77                                 
+    78                                 
+    79 00000015 8A0425[00000000]       mov al, byte [bVar1]
+    80 0000001C 2A0425[00000000]       sub al, byte [bVar2]
+    81 00000023 880425[00000000]       mov byte [bAns2], al
+    82                                 
+    83                                 
+    84                                 
+    85 0000002A 668B0425[00000000]     mov ax, word [wVar1]
+    86 00000032 66030425[00000000]     add ax, word [wVar2]
+    87 0000003A 66890425[00000000]     mov word [wAns1], ax
+    88                                 
+    89                                 
+    90                                 
+    91 00000042 668B0425[00000000]     mov ax, word [wVar1]
+    92 0000004A 662B0425[00000000]     sub ax, word [wVar2]
+    93 00000052 66890425[00000000]     mov word [wAns2], ax
+    94                                 
+    95                                 
+    96                                 
+    97 0000005A 8B0425[00000000]       mov eax, dword [dVar1]
+    98 00000061 030425[00000000]       add eax, dword [dVar2]
+    99 00000068 890425[00000000]       mov dword [dAns1], eax
+   100                                 
+   101                                 
+   102                                 
+   103 0000006F 8B0425[00000000]       mov eax, dword [dVar1]
+   104 00000076 2B0425[00000000]       sub eax, dword [dVar2]
+   105 0000007D 890425[00000000]       mov dword [dAns2], eax
+   106                                 
+   107                                 
+   108                                 
+   109                                 last:
+   110 00000084 48C7C03C000000          mov rax, SYS_exit
+   111 0000008B 48C7C700000000          mov rdi, EXIT_SUCCESS
+   112 00000092 0F05                    syscall
+   113                                 

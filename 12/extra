@@ -1,0 +1,91 @@
+global findDuckNumberCnt
+
+findDuckNumberCnt:
+    push rbp
+    mov rbp, rsp
+    sub rsp, 16
+    push rbx
+
+    ; Create local variable (quad)
+    mov qword [rbp-16], 0
+
+    ; Print msgThread1
+    mov rdi, msgThread1
+    call printString
+
+getNextBlock:
+    ; Spinlock
+   call spinLock
+
+    ; ; Get the current value of currentIndex
+    ; mov r8, [currentIndex]
+    mov rbx, r8
+
+    ; Check if currIndex > userLimit
+    cmp r8, [userLimit]
+    jg .done
+
+    ; ; Calculate the next block start
+    ; add r8, BLOCK_SIZE
+    mov r9, r8
+
+    ; Atomically update currentIndex to the next block start
+    lock xchg [currentIndex], r9
+
+    ; Spinunlock
+    call spinUnlock
+
+    ; The new block start is in r9
+    mov rbx, r9
+    
+
+    ; Reset local count
+    mov qword [rbp-16], 0
+
+    ; Loop through all numbers in the block
+    .loopNumber:
+        ; Check if currNum > limit
+        cmp rbx, [userLimit]
+        jg .updateGlobalCount
+
+        ; Find count of zeros
+        mov rcx, 0
+        mov rdi, rbx
+        
+
+        .countZeros:
+            mov rax, rdi
+            mov rdx, 0
+            mov r10, 10
+            div r10
+            cmp rdx, 0
+            jne .nonZero
+            inc rcx
+
+            .nonZero:
+            mov rdi, rax
+            cmp rdi, 0
+            jg .countZeros
+
+        ; Check if count of zeros is 1
+        cmp rcx, 1
+        jne .nextNumber
+        inc qword [rbp-16]
+
+        .nextNumber:
+        inc rbx
+        cmp rbx, r8
+        jl .loopNumber
+
+    .updateGlobalCount:
+    ; Update ducknumbercount with localcount
+    mov r8, [rbp-16]
+    lock add [duckNumberCount], r8
+    jmp getNextBlock
+
+    .done:
+    ; Cleanup and return
+    pop rbx
+    mov rsp, rbp
+    pop rbp
+    ret

@@ -1,0 +1,48 @@
+#------------------------------------
+#  CS 218 - Assignment #4
+#  Debugger Input Script
+#------------------------------------
+echo \n\n
+break last
+run
+set pagination off
+set logging file a4out.txt
+set logging overwrite
+set logging enabled on
+set prompt
+echo ------------------------------------ \n
+echo display variables \n
+echo \n
+echo Data Set\n
+x/100dw &list
+echo \nlist length:\t
+x/dw &length
+echo \n
+echo list min:\t
+x/dw &listMin
+echo list est med:\t
+x/dw &listEstMed
+echo list max:\t
+x/dw &listMax
+echo list sum:\t
+x/dw &listSum
+echo list ave:\t
+x/dw &listAve
+echo \n
+echo negative count:\t
+x/dw &negCnt
+echo negative sum:\t
+x/dw &negSum
+echo negative ave:\t
+x/dw &negAve
+echo \n
+echo twelve count:\t
+x/dw &twelveCnt
+echo twelve sum:\t
+x/dw &twelveSum
+echo twelve ave:\t
+x/dw &twelveAve
+echo \n \n
+set logging enabled off
+quit
+

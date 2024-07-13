@@ -1,0 +1,5 @@
+#  Local variables for createMagicSquare() function.
+
+errMsg:		.ascii	"\nError, invalid order.  "
+		.asciiz	"Unable to create magic square.\n"
+

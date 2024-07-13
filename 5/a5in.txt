@@ -1,0 +1,71 @@
+#------------------------------------
+# CS 218 - Assignment #5
+#  Debugger Input Script
+#------------------------------------
+echo \n\n
+break last
+run
+set pagination off
+set logging file a5out.txt
+set logging overwrite
+set logging on
+set prompt
+echo ------------------------------------ \n
+echo display variables \n
+echo \n
+echo bases: \n
+x/43ub &bases
+echo \n
+echo slants: \n
+x/43uh &slants
+echo \n
+echo heights: \n
+x/43uw &heights
+echo \n
+echo length: \n
+x/dw &length
+echo \n
+echo lateralAreas: \n
+x/43uw &lateralAreas
+echo \n
+echo laMin: \t\t
+x/uw &laMin
+echo laMax: \t\t
+x/uw &laMax
+echo laEstMed: \t
+x/uw &laEstMed
+echo laSum: \t\t
+x/uw &laSum
+echo laAve: \t\t
+x/uw &laAve
+echo \n
+echo totalAreas \n
+x/43dw &totalAreas
+echo \n
+echo taMin: \t\t
+x/uw &taMin
+echo taMax: \t\t
+x/uw &taMax
+echo taEstMed: \t
+x/uw &taEstMed
+echo taSum: \t\t
+x/uw &taSum
+echo taAve: \t\t
+x/uw &taAve
+echo \n
+echo volumes: \n
+x/43dw &volumes
+echo \n
+echo vMin: \t\t
+x/uw &vMin
+echo vMax: \t\t
+x/uw &vMax
+echo vEstMed: \t
+x/uw &vEstMed
+echo vSum: \t\t
+x/uw &vSum
+echo vAve: \t\t
+x/uw &vAve
+echo \n \n
+set logging off
+

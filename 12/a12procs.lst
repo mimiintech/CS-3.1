@@ -1,0 +1,541 @@
+     1                                 %line 1+1 a12procs.asm
+     2                                 
+     3                                 
+     4                                 
+     5                                 
+     6                                 
+     7                                 
+     8                                 
+     9                                 
+    10                                 
+    11                                 
+    12                                 
+    13                                 
+    14                                 
+    15                                 
+    16                                 
+    17                                 
+    18                                 [section .data]
+    19                                 
+    20                                 
+    21                                 
+    22                                 
+    23                                 LF equ 10
+    24                                 NULL equ 0
+    25                                 ESC equ 27
+    26                                 
+    27                                 TRUE equ 1
+    28                                 FALSE equ 0
+    29                                 
+    30                                 SUCCESS equ 0
+    31                                 NOSUCCESS equ 1
+    32                                 
+    33                                 STDIN equ 0
+    34                                 STDOUT equ 1
+    35                                 STDERR equ 2
+    36                                 
+    37                                 SYS_read equ 0
+    38                                 SYS_write equ 1
+    39                                 SYS_open equ 2
+    40                                 SYS_close equ 3
+    41                                 SYS_fork equ 57
+    42                                 SYS_exit equ 60
+    43                                 SYS_creat equ 85
+    44                                 SYS_time equ 201
+    45                                 
+    46                                 
+    47                                 
+    48                                 
+    49 00000000 0100000000000000       currentIndex dq 1
+    50 00000008 0000000000000000       myLock dq 0
+    51                                 
+    52                                 
+    53                                 
+    54                                 
+    55 00000010 202E2E2E5468726561-    msgThread1 db " ...Thread starting...", LF, NULL
+    56 00000010 64207374617274696E-
+    57 00000010 672E2E2E0A00       
+    58                                 
+    59                                 
+    60                                 
+    61                                 
+    62                                 THREAD_MIN equ 1
+    63                                 THREAD_MAX equ 24
+    64                                 
+    65                                 LIMIT_MIN equ 10
+    66                                 LIMIT_MAX equ 4000000000
+    67                                 BLOCK_SIZE equ 1000
+    68                                 
+    69 00000028 55736167653A202E2F-    errUsage db "Usage: ./duckNums -th <nonaryNumber> ",
+    70 00000028 6475636B4E756D7320-
+    71 00000028 2D7468203C6E6F6E61-
+    72 00000028 72794E756D6265723E-
+    73 00000028 20                 
+    74 0000004D 2D6C203C6E6F6E6172-     db "-l <nonaryNumber>", LF, NULL
+    75 0000004D 794E756D6265723E0A-
+    76 0000004D 00                 
+    77 00000060 4572726F722C20696E-    errOptions db "Error, invalid command line options."
+    78 00000060 76616C696420636F6D-
+    79 00000060 6D616E64206C696E65-
+    80 00000060 206F7074696F6E732E 
+    81 00000084 0A00                    db LF, NULL
+    82                                 
+    83 00000086 4572726F722C20696E-    errLSpec db "Error, invalid limit specifier."
+    84 00000086 76616C6964206C696D-
+    85 00000086 697420737065636966-
+    86 00000086 6965722E           
+    87 000000A5 0A00                    db LF, NULL
+    88 000000A7 4572726F722C20696E-    errLValue db "Error, invalid limit value."
+    89 000000A7 76616C6964206C696D-
+    90 000000A7 69742076616C75652E 
+    91 000000C2 0A00                    db LF, NULL
+    92 000000C4 4572726F722C206C69-    errLRange db "Error, limit out of range."
+    93 000000C4 6D6974206F7574206F-
+    94 000000C4 662072616E67652E   
+    95 000000DE 0A00                    db LF, NULL
+    96                                 
+    97                                 
+    98 000000E0 4572726F722C20696E-    errTSpec db "Error, invalid thread count specifier."
+    99 000000E0 76616C696420746872-
+   100 000000E0 65616420636F756E74-
+   101 000000E0 207370656369666965-
+   102 000000E0 722E               
+   103 00000106 0A00                    db LF, NULL
+   104 00000108 4572726F722C20696E-    errTValue db "Error, invalid thread count value."
+   105 00000108 76616C696420746872-
+   106 00000108 65616420636F756E74-
+   107 00000108 2076616C75652E     
+   108 0000012A 0A00                    db LF, NULL
+   109 0000012C 4572726F722C207468-    errTRange db "Error, thread count out of range."
+   110 0000012C 7265616420636F756E-
+   111 0000012C 74206F7574206F6620-
+   112 0000012C 72616E67652E       
+   113 0000014D 0A00                    db LF, NULL
+   114                                 
+   115                                 
+   116                                 
+   117                                 
+   118 0000014F 0900000000000000       qNine dq 9
+   119 00000157 0A00000000000000       qTen dq 10
+   120 0000015F 0000000000000000       tmpNum dq 0
+   121                                 
+   122                                 
+   123                                 
+   124                                 [section .text]
+   125                                 
+   126                                 
+   127                                 
+   128                                 
+   129                                 
+   130                                 
+   131                                 
+   132                                 
+   133                                 
+   134                                 
+   135                                 
+   136                                 
+   137                                 
+   138                                 
+   139                                 
+   140                                 
+   141                                 
+   142                                 
+   143                                 
+   144                                 
+   145                                 
+   146                                 
+   147                                 
+   148                                 
+   149                                 
+   150                                 
+   151                                 
+   152                                 [global getParams]
+   153                                 getParams:
+   154 00000000 53                      push rbx
+   155 00000001 4154                    push r12
+   156 00000003 4155                    push r13
+   157 00000005 4156                    push r14
+   158                                 
+   159 00000007 4883FF01                cmp rdi, 1
+   160 0000000B 0F84F4000000            je ErrorUsage
+   161 00000011 4883FF05                cmp rdi, 5
+   162 00000015 0F8505010000            jne ErrorOptions
+   163                                 
+   164 0000001B 4989F4                  mov r12, rsi
+   165 0000001E 4989D5                  mov r13, rdx
+   166 00000021 4989CE                  mov r14, rcx
+   167                                 
+   168 00000024 4D8B5C2408              mov r11, qword [r12+8]
+   169 00000029 418A03                  mov al, byte [r11]
+   170 0000002C 3C2D                    cmp al, "-"
+   171 0000002E 0F8558010000            jne ErrorTSpecifier
+   172 00000034 418A4301                mov al, byte [r11+1]
+   173 00000038 3C74                    cmp al, "t"
+   174 0000003A 0F854C010000            jne ErrorTSpecifier
+   175 00000040 418A4302                mov al, byte [r11+2]
+   176 00000044 3C68                    cmp al, "h"
+   177 00000046 0F8540010000            jne ErrorTSpecifier
+   178 0000004C 418A4303                mov al, byte [r11+3]
+   179 00000050 3C00                    cmp al, NULL
+   180 00000052 0F8534010000            jne ErrorTSpecifier
+   181                                 
+   182 00000058 498B7C2410              mov rdi, qword [r12+16]
+   183 0000005D 48C7C6[00000000]        mov rsi, tmpNum
+   184                                 
+   185 00000064 E875010000              call aNonary2int
+   186 00000069 4883F800                cmp rax, 0
+   187 0000006D 0F8434010000            je ErrorTValue
+   188 00000073 488B0425[00000000]      mov rax, qword [tmpNum]
+   189                                 
+   190 0000007B 4883F801                cmp rax, THREAD_MIN
+   191 0000007F 0F82B6000000            jb ErrorTRange
+   192 00000085 4883F818                cmp rax, THREAD_MAX
+   193 00000089 0F87AC000000            ja ErrorTRange
+   194 0000008F 49894500                mov qword [r13], rax
+   195                                 
+   196 00000093 4D8B5C2418              mov r11, qword [r12+24]
+   197 00000098 418A03                  mov al, byte [r11]
+   198 0000009B 3C2D                    cmp al, "-"
+   199 0000009D 0F85CE000000            jne ErrorLSpecifier
+   200 000000A3 418A4301                mov al, byte [r11+1]
+   201 000000A7 3C6C                    cmp al, "l"
+   202 000000A9 0F85C2000000            jne ErrorLSpecifier
+   203 000000AF 418A4302                mov al, byte [r11+2]
+   204 000000B3 3C6D                    cmp al, "m"
+   205 000000B5 0F85B6000000            jne ErrorLSpecifier
+   206 000000BB 418A4303                mov al, byte [r11+3]
+   207 000000BF 3C00                    cmp al, NULL
+   208 000000C1 0F85AA000000            jne ErrorLSpecifier
+   209                                 
+   210 000000C7 498B7C2420              mov rdi, qword [r12+32]
+   211 000000CC 48C7C6[00000000]        mov rsi, tmpNum
+   212                                 
+   213 000000D3 E806010000              call aNonary2int
+   214 000000D8 4883F800                cmp rax, 0
+   215 000000DC 0F84E0000000            je ErrorLValue
+   216 000000E2 488B0425[00000000]      mov rax, qword [tmpNum]
+   217                                 
+   218 000000EA 4983F80A                cmp r8, LIMIT_MIN
+   219 000000EE 726A                    jb ErrorLRange
+   220 000000F0 4981F800286BEE          cmp r8, LIMIT_MAX
+   221 000000F7 7761                    ja ErrorLRange
+   222 000000F9 4D8906                  mov qword [r14], r8
+   223                                 
+   224 000000FC 48C7C001000000          mov rax, TRUE
+   225 00000103 415E                    pop r14
+   226 00000105 415D                    pop r13
+   227 00000107 415C                    pop r12
+   228 00000109 5B                      pop rbx
+   229 0000010A C3                      ret
+   230                                 
+   231                                 ErrorUsage:
+   232 0000010B 48C7C7[00000000]       mov rdi, errUsage
+   233 00000112 E826020000             call printString
+   234 00000117 48C7C000000000         mov rax, FALSE
+   235 0000011E 415E                   pop r14
+   236 00000120 415D                   pop r13
+   237 00000122 415C                   pop r12
+   238 00000124 5B                     pop rbx
+   239 00000125 C3                     ret
+   240                                 
+   241                                 ErrorOptions:
+   242 00000126 48C7C7[00000000]       mov rdi, errOptions
+   243 0000012D E80B020000             call printString
+   244 00000132 48C7C000000000         mov rax, FALSE
+   245 00000139 415E                   pop r14
+   246 0000013B 415D                   pop r13
+   247 0000013D 415C                   pop r12
+   248 0000013F 5B                     pop rbx
+   249 00000140 C3                     ret
+   250                                 
+   251                                 ErrorTRange:
+   252 00000141 48C7C7[00000000]       mov rdi, errTRange
+   253 00000148 E8F0010000             call printString
+   254 0000014D 48C7C000000000         mov rax, FALSE
+   255 00000154 415E                   pop r14
+   256 00000156 415D                   pop r13
+   257 00000158 415C                   pop r12
+   258 0000015A 5B                     pop rbx
+   259 0000015B C3                     ret
+   260                                 
+   261                                 ErrorLRange:
+   262 0000015C 48C7C7[00000000]       mov rdi, errLRange
+   263 00000163 E8D5010000             call printString
+   264 00000168 48C7C000000000         mov rax, FALSE
+   265 0000016F 415E                   pop r14
+   266 00000171 415D                   pop r13
+   267 00000173 415C                   pop r12
+   268 00000175 5B                     pop rbx
+   269 00000176 C3                     ret
+   270                                 
+   271                                 ErrorLSpecifier:
+   272 00000177 48C7C7[00000000]       mov rdi, errLSpec
+   273 0000017E E8BA010000             call printString
+   274 00000183 48C7C000000000         mov rax, FALSE
+   275 0000018A 415E                   pop r14
+   276 0000018C 415D                   pop r13
+   277 0000018E 415C                   pop r12
+   278 00000190 5B                     pop rbx
+   279 00000191 C3                     ret
+   280                                 
+   281                                 ErrorTSpecifier:
+   282 00000192 48C7C7[00000000]       mov rdi, errTSpec
+   283 00000199 E89F010000             call printString
+   284 0000019E 48C7C000000000         mov rax, FALSE
+   285 000001A5 415E                   pop r14
+   286 000001A7 415D                   pop r13
+   287 000001A9 415C                   pop r12
+   288 000001AB 5B                     pop rbx
+   289 000001AC C3                     ret
+   290                                 
+   291                                 ErrorTValue:
+   292 000001AD 48C7C7[00000000]       mov rdi, errTValue
+   293 000001B4 E884010000             call printString
+   294 000001B9 48C7C000000000         mov rax, FALSE
+   295 000001C0 415E                   pop r14
+   296 000001C2 415D                   pop r13
+   297 000001C4 415C                   pop r12
+   298 000001C6 5B                     pop rbx
+   299 000001C7 C3                     ret
+   300                                 
+   301                                 ErrorLValue:
+   302 000001C8 48C7C7[00000000]       mov rdi, errLValue
+   303 000001CF E869010000             call printString
+   304 000001D4 48C7C000000000         mov rax, FALSE
+   305 000001DB 415E                   pop r14
+   306 000001DD 415D                   pop r13
+   307 000001DF 415C                   pop r12
+   308 000001E1 5B                     pop rbx
+   309 000001E2 C3                     ret
+   310                                 
+   311                                 
+   312                                 
+   313                                 
+   314                                 
+   315                                 
+   316                                 
+   317                                 
+   318                                 
+   319                                 
+   320                                 [global aNonary2int]
+   321                                 aNonary2int:
+   322 000001E3 55                      push rbp
+   323 000001E4 4889E5                  mov rbp, rsp
+   324                                 
+   325 000001E7 48C7C000000000          mov rax, 0
+   326 000001EE 48C7C300000000          mov rbx, 0
+   327 000001F5 48C70600000000          mov qword [rsi], 0
+   328                                 
+   329                                  conversion:
+   330 000001FC 49C7C000000000          mov r8, 0
+   331 00000203 4C0FB6041F              movzx r8, byte [rdi+rbx]
+   332 00000208 4180F800                cmp r8b, NULL
+   333 0000020C 7425                    je conversionDone
+   334                                 
+   335                                 
+   336 0000020E 4180F830                cmp r8b, '0'
+   337 00000212 7228                    jb falseCondition
+   338 00000214 4180F838                cmp r8b, '8'
+   339 00000218 7722                    ja falseCondition
+   340                                 
+   341 0000021A 4983E830                sub r8, '0'
+   342 0000021E 488B06                  mov rax, qword [rsi]
+   343 00000221 480FAF0425[00000000]      imul rax, [qNine]
+   344 0000022A 488906                  mov qword [rsi], rax
+   345                                 
+   346 0000022D 4C0106                  add qword [rsi], r8
+   347 00000230 48FFC3                  inc rbx
+   348 00000233 EBC5                    jmp conversion
+   349                                 
+   350                                  conversionDone:
+   351 00000235 48C7C001000000          mov rax, TRUE
+   352 0000023C EB05                    jmp end
+   353                                 
+   354                                  falseCondition:
+   355 0000023E 48C7C000000000          mov rax, FALSE
+   356                                 
+   357                                  end:
+   358 00000245 4889EC                  mov rsp, rbp
+   359 00000248 5D                      pop rbp
+   360 00000249 C3                      ret
+   361                                 
+   362                                 
+   363                                 
+   364                                 
+   365                                 
+   366                                 
+   367                                 
+   368                                 
+   369                                 
+   370                                 
+   371                                 
+   372                                 [common userLimit 1:8]
+   373                                 [common duckNumberCount 1:8]
+   374                                 
+   375                                 [global findDuckNumberCnt]
+   376                                 
+   377                                 findDuckNumberCnt:
+   378 0000024A 55                      push rbp
+   379 0000024B 4889E5                  mov rbp, rsp
+   380 0000024E 4883EC08                sub rsp, 8
+   381 00000252 53                      push rbx
+   382 00000253 4157                    push r15
+   383 00000255 4155                    push r13
+   384                                 
+   385                                 localVars:
+   386 00000257 48C7C7[00000000]        mov rdi, msgThread1
+   387 0000025E E8DA000000              call printString
+   388 00000263 48C745F800000000        mov qword [rbp-8], FALSE
+   389 0000026B 49C7C0E8030000          mov r8, BLOCK_SIZE
+   390                                 
+   391                                 nextblock:
+   392 00000272 E8A0000000              call spinLock
+   393 00000277 4C8B3425[00000000]      mov r14, qword [userLimit]
+   394 0000027F 4C8B1425[00000000]      mov r10, qword [currentIndex]
+   395 00000287 4D39F2                  cmp r10, r14
+   396 0000028A 7311                    jae beyondLimit
+   397 0000028C 4D01D0                  add r8, r10
+   398 0000028F 4D39F0                  cmp r8, r14
+   399 00000292 7601                    jbe updateCurrentIndex
+   400 00000294 4D89F0                  mov r8, r14
+   401                                 
+   402                                 updateCurrentIndex:
+   403 00000297 4C890425[00000000]      mov qword [currentIndex], r8
+   404                                 
+   405                                 beyondLimit:
+   406 0000029F E889000000              call spinUnlock
+   407 000002A4 4D89D7                  mov r15, r10
+   408 000002A7 4D39F2                  cmp r10, r14
+   409 000002AA 7364                    jae exitLoop
+   410 000002AC 48C745F800000000        mov qword [rbp-8], FALSE
+   411                                 
+   412                                 numsLoop:
+   413 000002B4 4C89FF                  mov rdi, r15
+   414 000002B7 48C7C300000000          mov rbx, FALSE
+   415 000002BE 4D39C7                  cmp r15, r8
+   416 000002C1 733B                    jae incGlobalCnt
+   417                                 
+   418                                 cntOfZeros:
+   419 000002C3 4889F8                  mov rax, rdi
+   420 000002C6 48C7C200000000          mov rdx, 0
+   421 000002CD 4C8B2C25[00000000]      mov r13, [qTen]
+   422 000002D5 49F7F5                  div r13
+   423 000002D8 4883FA00                cmp rdx, 0
+   424 000002DC 7400                    je incCounter
+   425 000002DE EB01                    jmp continueProcess
+   426                                 
+   427                                 incCounter:
+   428 000002E0 48FFC3                  inc rbx
+   429                                 
+   430                                 continueProcess:
+   431 000002E3 4889C7                  mov rdi, rax
+   432 000002E6 4883FF00                cmp rdi, 0
+   433 000002EA 77D5                    ja cntOfZeros
+   434                                 
+   435                                 exactlyOne:
+   436 000002EC 4883FB01                cmp rbx, TRUE
+   437 000002F0 7502                    jne nextNum
+   438 000002F2 48FF45F8                inc qword [rbp-8]
+   439                                 
+   440                                 nextNum:
+   441 000002F6 49FFC7                  inc r15
+   442 000002F9 EBB7                    jmp numsLoop
+   443                                 
+   444                                 blockProcess:
+   445 000002FB 4D39C7                  cmp r15, r8
+   446 000002FE 72B2                    jb numsLoop
+   447                                 
+   448                                 incGlobalCnt:
+   449 00000300 4C8B55F8                mov r10, qword [rbp-8]
+   450 00000304 F04C011425[00000000]      lock add [duckNumberCount], r10
+   451 0000030D E95BFFFFFF              jmp nextblock
+   452                                 
+   453                                 exitLoop:
+   454 00000312 415D                    pop r13
+   455 00000314 415F                    pop r15
+   456 00000316 5B                      pop rbx
+   457 00000317 4889EC                  mov rsp, rbp
+   458 0000031A 5D                      pop rbp
+   459 0000031B C3                      ret
+   460                                 
+   461                                 
+   462                                 
+   463                                 
+   464                                 
+   465                                 
+   466                                 [global spinLock]
+   467                                 spinLock:
+   468 0000031C 48C7C001000000          mov rax, 1
+   469                                 
+   470 00000323 F048870425[00000000]     lock xchg rax, qword [myLock]
+   471                                 
+   472                                 
+   473                                 
+   474                                 
+   475 0000032C 4885C0                  test rax, rax
+   476                                 
+   477                                 
+   478                                 
+   479                                 
+   480                                 
+   481 0000032F 75E9                    jnz spinLock
+   482                                 
+   483                                 
+   484 00000331 C3                      ret
+   485                                 
+   486                                 
+   487                                 
+   488                                 
+   489                                 
+   490                                 [global spinUnlock]
+   491                                 spinUnlock:
+   492 00000332 48C7C000000000          mov rax, 0
+   493                                 
+   494 00000339 48870425[00000000]      xchg rax, qword [myLock]
+   495                                 
+   496 00000341 C3                      ret
+   497                                 
+   498                                 
+   499                                 
+   500                                 
+   501                                 
+   502                                 
+   503                                 
+   504                                 
+   505                                 
+   506                                 
+   507                                 
+   508                                 
+   509                                 
+   510                                 [global printString]
+   511                                 printString:
+   512                                 
+   513                                 
+   514                                 
+   515                                 
+   516 00000342 48C7C200000000          mov rdx, 0
+   517                                 strCountLoop:
+   518 00000349 803C1700                cmp byte [rdi+rdx], NULL
+   519 0000034D 7403                    je strCountLoopDone
+   520 0000034F 48FFC2                  inc rdx
+   521 00000352 EBF3                    jmp strCountLoop
+   522                                 strCountLoopDone:
+   523 00000354 4883FA00                cmp rdx, 0
+   524 00000358 7411                    je printStringDone
+   525                                 
+   526                                 
+   527                                 
+   528                                 
+   529 0000035A 48C7C001000000          mov rax, SYS_write
+   530 00000361 4889FE                  mov rsi, rdi
+   531 00000364 48C7C701000000          mov rdi, STDOUT
+   532                                 
+   533 0000036B 0F05                    syscall
+   534                                 
+   535                                 
+   536                                 
+   537                                 
+   538                                 printStringDone:
+   539 0000036D C3                      ret
+   540                                 
+   541                                 

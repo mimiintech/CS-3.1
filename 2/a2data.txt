@@ -1,0 +1,27 @@
+
+; -----
+
+bVar1		db	37
+bVar2		db	51
+bAns1		db	0
+bAns2		db	0
+
+
+wVar1		dw	2654
+wVar2		dw	1873
+wAns1		dw	0
+wAns2		dw	0
+dVar1		dd	164126937
+dVar2		dd	102512521
+dVar3		dd	-15476
+dAns1		dd	0
+dAns2		dd	0
+qVar1		dq	123456789112
+flt1		dd	-15.125
+flt2		dd	11.25
+tao		dd	2.71828
+myClass		db	"CS-218", NULL
+saying		db	"May the force be with you.", NULL
+myName		db	"your name goes here", NULL
+
+

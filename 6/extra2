@@ -1,0 +1,270 @@
+; --------------------------------------------------------
+;  Read an ASCII nonary number from the user.
+;  Perform appropriate error checking and, if OK,
+;  convert to integer.
+
+; -----
+;  HLL Call:
+;	bool = readNonaryNum(&numberRead, promptStr, errMsg1,
+;				errMsg2, errMsg3);
+
+;  Arguments Passed:
+;	numberRead, addr - rdi
+;	promptStr, addr - rsi
+;	errMsg1, addr - rdx
+;	errMsg2, addr - rcx
+;	errMsg3, addr - r8
+
+;  Returns:
+;	true/false
+;	number read (via reference)
+
+global    readNonaryNum
+readNonaryNum:
+    push rbp
+    mov rbp, rsp
+    sub rsp, 56 
+
+    push rbx
+    push r12
+    push r13 
+    push r14
+    push r15
+
+    mov r14, rdx ;message 1
+    mov r15, rcx ;message 2
+    mov r13, rdi
+    
+    mov rdi, rsi 
+    ; SI Jorge told me to add push rsi and r8
+    ; to preserve those values without using more
+    ; stack
+    push rsi
+    push r8
+    call printString
+    pop r8
+    pop rsi
+
+localVars: 
+    ; Initialize local variables
+    lea rbx, byte [rbp-51] ;buffer
+    mov dword [rbp-55], 0 ;sum 
+    mov byte [rbp-56], 0 ;chr
+    mov r12, 0  ;count++
+
+getChar:
+    ; SI Jorge told me to add push rsi and r8
+    ; to preserve those values without using more
+    ; stack
+    push rsi
+    push r8
+    mov rax, SYS_read    
+    mov rdi, STDIN       
+    lea rsi, byte [rbp-56] ;chr
+    mov rdx, 1         
+    syscall  
+    pop r8
+    pop rsi
+
+    mov al, byte [rbp-56] ;chr 
+    cmp al, LF
+    je inputDone           
+
+; Exceeding input max 
+    cmp r12, BUFFSIZE
+    jae aboveFifty 
+
+    ;chr stored 
+    mov byte [rbx + r12], al 
+    inc r12 
+
+aboveFifty:
+    jmp getChar
+
+inputDone:
+; if i = 0, set false condiiton
+    cmp r12, 0
+    ja checkSize 
+    mov rax, FALSE
+    jmp Cleanup
+
+checkSize:
+; if input > BUFFSIZE, set code exit function
+    cmp r12, BUFFSIZE
+    jb checkInput 
+; if below, check the input 
+    jmp ErrorInvalidInput 
+
+checkInput:
+    mov r9d, 1 
+
+    mov byte [rbx+r12], NULL  
+    lea rbx, byte [rbp-51] ;loop again
+    
+; ERROR CHECKING SECTION
+    mov rcx, 0
+ErrorCheckLoop:
+    mov cl, byte [rbx]
+    cmp cl, SPACE
+; leading spaces ignored 
+    jne secondCheck
+    inc rbx
+    jmp ErrorCheckLoop
+; Signs(+/-) included 
+secondCheck:
+; leading spaces ignored
+    cmp cl, '+'
+    je skipSign ; Skip '+' sign
+
+    cmp cl, '-'
+    je handleNegative ; Handle '-' sign by setting r9d
+
+    ; If not '+' or '-', proceed to check if it's a valid digit
+    cmp cl, '0'
+    jb ErrorInvalidInput ; Before '0' is invalid
+    cmp cl, '8'
+    ja ErrorInvalidInput ; After '8' is invalid, assuming nonary input
+
+    ; The character is within '0' - '8', ready for conversion
+    jmp WithinRangeCheck
+
+skipSign:
+    inc rbx ;inc string postiion 
+    jmp WithinRangeCheck
+
+handleNegative:
+    mov r9d, -1
+    inc rbx 
+
+; CONVERSION SECTION
+WithinRangeCheck:
+    mov cl, byte [rbx]
+    cmp cl, NULL
+    je doneConversion
+    cmp cl, '0'
+    jb ErrorInvalidInput
+    cmp cl, '8'
+    ja ErrorInvalidInput
+
+; Conversion chr to int 
+    mov r9, 0
+    sub cl, '0'
+   mov r9b, cl
+
+; Sum * 9
+    mov eax, dword [rbp - 55] ;sum
+    imul eax, 9
+    mov dword [rbp - 55], eax ; stored sum
+
+; Sum + int 
+    add dword [rbp - 55], r9d
+    inc rbx
+    jmp WithinRangeCheck
+
+    doneConversion:
+    mov eax, dword [rbp-55] ;sum
+    imul eax, r9d       ; Apply the sign
+    mov dword [r13], eax ; Store into r13 
+
+; If the value after conversion is within min & max
+    mov eax, dword [rbp-55]
+
+    cmp eax, MINNUM
+    jl ErrorOutOfRange
+    cmp eax, MAXNUM
+    jg ErrorOutOfRange
+    ; save number
+
+    mov dword[r13], eax
+    mov rax, TRUE 
+    jmp Cleanup
+
+; ERROR SECTION
+; "Error, invalid. Please re-enter.\n";
+ErrorInvalidInput:
+    mov rdi, r14 ;message 1
+    ; SI Jorge told me to add push rsi and r8
+    ; to preserve those values without using more
+    ; stack
+    push rsi
+    push r8
+    call printString
+    pop r8
+    pop rsi
+	; reprompt for input
+    mov rdi, r13
+    mov rdx, r14
+    mov rcx, r15
+    pop r15
+    pop r14
+    pop r13
+	pop r12
+	pop rbx
+    add rsp, 56
+    mov rsp, rbp
+    pop rbp
+    jmp readNonaryNum
+
+;"Error, out of range. Please re-enter.\n";
+ ErrorOutOfRange:
+    mov rdi, r15 ;message 2
+    ; SI Jorge told me to add push rsi and r8
+    ; to preserve those values without using more
+    ; stack
+    push rsi
+    push r8
+    call printString
+    pop r8
+    pop rsi
+    ; reprompt for input
+    mov rdi, r13
+    mov rdx, r14
+    mov rcx, r15
+    pop r15
+    pop r14
+    pop r13
+	pop r12
+	pop rbx
+    add rsp, 56
+    mov rsp, rbp
+    pop rbp
+    jmp readNonaryNum
+
+;"Error, input too long. Please re-enter.\n";
+ErrorInputTooLong:
+    mov rdi, r8 ;message 3 
+    ; SI Jorge told me to add push rsi and r8
+    ; to preserve those values without using more
+    ; stack
+    push rsi
+    push r8
+    call printString
+    pop r8
+    pop rsi
+	; reprompt for input
+    mov rdi, r13
+    mov rdx, r14
+    mov rcx, r15
+    pop r15
+    pop r14
+    pop r13
+	pop r12
+	pop rbx
+    add rsp, 56
+    mov rsp, rbp
+    pop rbp
+    jmp readNonaryNum
+
+Cleanup:
+    mov rdi, r13
+    mov rdx, r14
+    mov rcx, r15
+    pop r15
+    pop r14
+    pop r13
+	pop r12
+	pop rbx
+    add rsp, 56
+    mov rsp, rbp
+    pop rbp
+ret
